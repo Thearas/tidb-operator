@@ -14,12 +14,28 @@
 package metrics
 
 import (
+	"net/url"
+	"time"
+
 	"github.com/prometheus/client_golang/prometheus"
+	"k8s.io/client-go/tools/metrics"
 )
 
 // RegisterMetrics registers all metrics of tidb-operator.
 func RegisterMetrics() {
 	prometheus.MustRegister(ClusterSpecReplicas)
+	metrics.Register(metrics.RegisterOpts{
+		RequestLatency:     &KubeLatencyMetric{latencySeconds: KubeRequestLatency},
+		RateLimiterLatency: &KubeLatencyMetric{latencySeconds: KubeRateLimiterLatency},
+	})
+}
+
+type KubeLatencyMetric struct {
+	latencySeconds *prometheus.HistogramVec
+}
+
+func (k *KubeLatencyMetric) Observe(verb string, u url.URL, latency time.Duration) {
+	k.latencySeconds.WithLabelValues(u.Path, verb).Observe(latency.Seconds())
 }
 
 // Label constants.
