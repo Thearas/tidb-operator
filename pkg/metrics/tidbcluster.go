@@ -15,6 +15,7 @@ package metrics
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 var (
@@ -25,4 +26,16 @@ var (
 			Name:      "spec_replicas",
 			Help:      "Desired replicas of each component in TidbCluster",
 		}, []string{LabelNamespace, LabelName, LabelComponent})
+
+	KubeRequestLatency = promauto.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "kube_request_latency_seconds",
+			Buckets: prometheus.ExponentialBuckets(0.005, 2, 12),
+		}, []string{"path", "method"})
+
+	KubeRateLimiterLatency = promauto.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "kube_request_ratelimit_seconds",
+			Buckets: prometheus.ExponentialBuckets(0.005, 2, 12),
+		}, []string{"path", "method"})
 )
