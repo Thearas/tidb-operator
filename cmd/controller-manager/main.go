@@ -101,6 +101,8 @@ func main() {
 	if err != nil {
 		klog.Fatalf("failed to get config: %v", err)
 	}
+	cfg.QPS = 50
+	cfg.Burst = 100
 
 	cli, err := versioned.NewForConfig(cfg)
 	if err != nil {
